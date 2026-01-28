@@ -9,6 +9,7 @@ services:
     user: "node-red"
     environment:
       - TZ=Europe/Athens
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     ports:
       - "1880:1880" # Node-RED UI/Editor
     depends_on:
