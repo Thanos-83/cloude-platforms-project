@@ -1,3 +1,182 @@
+# version: '3.8'
+
+# services:
+#   # Node-RED 
+#   node-red:
+#     image: gkousiou/nodelab:latest
+#     container_name: node-red
+#     restart: always
+#     user: "node-red"
+#     environment:
+#       - TZ=Europe/Athens
+#       - GEMINI_API_KEY=${GEMINI_API_KEY}
+#     ports:
+#       - "1880:1880" # Node-RED UI/Editor
+#     depends_on:
+#       - rabbitmq
+#       - minio
+#     volumes:
+#       - ./node-red/data:/data # Persist flows, settings, and nodes
+#     networks:
+#       - invoice-app-network
+  
+#     # MinIO 
+#   minio:
+#     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+#     container_name: minio
+#     restart: always
+#     environment:
+#       MINIO_ROOT_USER: minioadmin
+#       MINIO_ROOT_PASSWORD: minioadmin
+#     command: server /data --console-address ":9001"
+#     ports:
+#       - "9000:9000" # MinIO API port
+#       - "9001:9001" # MinIO Console/Browser UI port
+#     volumes:
+#       - minio_data:/data # Persist object data with named volume
+#     networks:
+#       - invoice-app-network
+#     depends_on:
+#       - rabbitmq # Ensure RabbitMQ starts before MinIO
+
+#   # RabbitMQ (Message Broker)
+#   rabbitmq:
+#     image: rabbitmq:3.12-management # Includes management plugin for UI
+#     container_name: rabbitmq
+#     restart: always
+#     environment:
+#       - RABBITMQ_DEFAULT_USER=user
+#       - RABBITMQ_DEFAULT_PASS=password
+#     ports:
+#       - "5672:5672" # Standard AMQP port
+#       - "15672:15672" # Management UI port
+#     volumes:
+#       - rabbitmq_data:/var/lib/rabbitmq # Persist queue and broker data with named volume
+#     networks:
+#       - invoice-app-network
+
+#   # Postgres
+#   postgres:
+#     image: postgres:15
+#     container_name: postgres
+#     restart: always
+#     environment:
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: invoice_db
+#     ports:
+#       - "5432:5432" # Standard PostgreSQL port
+#     expose:
+#       - 5432 # Standard PostgreSQL port
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data # Persist database data with named volume
+#       - ./assets/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql # Run init script
+#     networks:
+#       - invoice-app-network
+#     healthcheck:
+#       test: ["CMD", "pg_isready", "-U", "user"]
+#       interval: 30s
+#       timeout: 30s
+#       retries: 3
+  
+#   # Keycloak
+#   keycloak:
+#     image: quay.io/keycloak/keycloak:24.0
+#     container_name: keycloak
+#     command: ["start-dev"] 
+#     restart: always
+#     environment:
+#       # - KC_HOSTNAME=localhost
+#       # - KC_HOSTNAME_PORT=8080
+#       - KC_HOSTNAME_ADMIN=localhost
+#       - KC_HOSTNAME_ADMIN_PORT=8080
+#       - KC_DB=postgres
+#       - KC_DB_SCHEMA=public
+#       - KC_DB_URL_HOST=postgres
+#       - KC_DB_URL_DATABASE=keycloak
+#       - KC_DB_USERNAME=user
+#       - KC_DB_PASSWORD=password
+#       - KEYCLOAK_ADMIN=admin
+#       - KEYCLOAK_ADMIN_PASSWORD=admin
+#       - KC_HOSTNAME_STRICT=false
+#       - KC_METRICS_ENABLED=true
+#       - KC_HEALTH_ENABLED=true
+#       - KC_LOG_LEVEL=INFO
+#       # - KC_PROXY=edge
+#     ports:
+#       - "8080:8080" # Keycloak Admin Console port
+#     depends_on:
+#       postgres: # Ensure Postgres starts before Keycloak
+#         condition: service_healthy
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:9990 || exit 1"] # Keycloak health check endpoint
+#       interval: 30s
+#       timeout: 30s
+#       retries: 3
+#     networks:
+#       - invoice-app-network
+
+# # Next.js Frontend
+#   frontend:
+#     container_name: frontend
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#       target: dev
+#     restart: always
+#     ports:
+#       - "3000:3000"
+#     env_file:
+#       - ./frontend/.env
+#     environment:
+#       # We override the Issuer URL so the container talks to the Keycloak container, not itself.
+#       - AUTH_KEYCLOAK_ISSUER=http://localhost:8080/realms/invoice-realm
+#       # - AUTH_KEYCLOAK_ISSUER=http://keycloak:8080/realms/invoice-realm
+      
+#       # Ensure the Trust Host is set (Required for Auth.js v5 in Docker)
+#       - AUTH_TRUST_HOST=true
+      
+#       # Keep the Database URL pointing to the postgres service
+#       - DATABASE_URL=postgresql://user:password@postgres:5432/invoice_db
+#     extra_hosts:
+#       - "localhost:host-gateway"
+#     volumes:
+#       - ./frontend/:/app
+#       - /app/node_modules
+#       - /app/.next
+#     depends_on:
+#       - postgres
+#       - keycloak
+#     networks:
+#       - invoice-app-network
+
+#   # pgAdmin
+#   pgadmin:
+#     image: dpage/pgadmin4:latest
+#     container_name: pgadmin
+#     restart: always
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+#       PGADMIN_DEFAULT_PASSWORD: "admin"
+#     ports:
+#       - "5050:80"  # Access via http://localhost:5050
+#     volumes:
+#       - pgadmin_data:/var/lib/pgadmin  # Persist your server connections
+#     networks:
+#       - invoice-app-network
+
+
+# networks:
+#   invoice-app-network:
+#     driver: bridge
+
+# volumes:
+#   postgres_data:
+#   minio_data:
+#   rabbitmq_data:
+#   pgadmin_data:
+
+
 version: '3.8'
 
 services:
@@ -9,49 +188,50 @@ services:
     user: "node-red"
     environment:
       - TZ=Europe/Athens
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     ports:
-      - "1880:1880" # Node-RED UI/Editor
+      - "1880:1880"
     depends_on:
       - rabbitmq
       - minio
     volumes:
-      - ./node-red/data:/data # Persist flows, settings, and nodes
+      - ./node-red/data:/data
     networks:
       - invoice-app-network
   
-    # MinIO 
+  # MinIO 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
     restart: always
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}         
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} 
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000" # MinIO API port
-      - "9001:9001" # MinIO Console/Browser UI port
+      - "9000:9000"
+      - "9001:9001"
     volumes:
-      - minio_data:/data # Persist object data with named volume
+      - minio_data:/data
     networks:
       - invoice-app-network
     depends_on:
-      - rabbitmq # Ensure RabbitMQ starts before MinIO
+      - rabbitmq
 
-  # RabbitMQ (Message Broker)
+  # RabbitMQ
   rabbitmq:
-    image: rabbitmq:3.12-management # Includes management plugin for UI
+    image: rabbitmq:3.12-management
     container_name: rabbitmq
     restart: always
     environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS} 
     ports:
-      - "5672:5672" # Standard AMQP port
-      - "15672:15672" # Management UI port
+      - "5672:5672"
+      - "15672:15672"
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq # Persist queue and broker data with named volume
+      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - invoice-app-network
 
@@ -61,20 +241,20 @@ services:
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: invoice_db
+      POSTGRES_USER: ${POSTGRES_USER}          
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  
+      POSTGRES_DB: ${POSTGRES_DB}              
     ports:
-      - "5432:5432" # Standard PostgreSQL port
+      - "5432:5432"
     expose:
-      - 5432 # Standard PostgreSQL port
+      - 5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist database data with named volume
-      - ./assets/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql # Run init script
+      - postgres_data:/var/lib/postgresql/data
+      - ./assets/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - invoice-app-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "user"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -86,37 +266,29 @@ services:
     command: ["start-dev"] 
     restart: always
     environment:
-      # - KC_HOSTNAME=localhost
-      # - KC_HOSTNAME_PORT=8080
       - KC_HOSTNAME_ADMIN=localhost
       - KC_HOSTNAME_ADMIN_PORT=8080
       - KC_DB=postgres
       - KC_DB_SCHEMA=public
       - KC_DB_URL_HOST=postgres
       - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_USERNAME=user
-      - KC_DB_PASSWORD=password
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB_USERNAME=${KEYCLOAK_DB_USER}         
+      - KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}     
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}           
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD} 
       - KC_HOSTNAME_STRICT=false
       - KC_METRICS_ENABLED=true
       - KC_HEALTH_ENABLED=true
       - KC_LOG_LEVEL=INFO
-      # - KC_PROXY=edge
     ports:
-      - "8080:8080" # Keycloak Admin Console port
+      - "8080:8080"
     depends_on:
-      postgres: # Ensure Postgres starts before Keycloak
+      postgres:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9990 || exit 1"] # Keycloak health check endpoint
-      interval: 30s
-      timeout: 30s
-      retries: 3
     networks:
       - invoice-app-network
 
-# Next.js Frontend
+  # Next.js Frontend
   frontend:
     container_name: frontend
     build:
@@ -126,18 +298,18 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    env_file:
-      - ./frontend/.env
     environment:
-      # We override the Issuer URL so the container talks to the Keycloak container, not itself.
-      - AUTH_KEYCLOAK_ISSUER=http://localhost:8080/realms/invoice-realm
-      # - AUTH_KEYCLOAK_ISSUER=http://keycloak:8080/realms/invoice-realm
-      
-      # Ensure the Trust Host is set (Required for Auth.js v5 in Docker)
+      # --- AUTH.JS CONFIG ---
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_KEYCLOAK_ID=${AUTH_KEYCLOAK_ID}
+      - AUTH_KEYCLOAK_SECRET=${AUTH_KEYCLOAK_SECRET}
+      - AUTH_KEYCLOAK_ISSUER=http://${HOST_IP}:8080/realms/invoice-realm
       - AUTH_TRUST_HOST=true
-      
-      # Keep the Database URL pointing to the postgres service
-      - DATABASE_URL=postgresql://user:password@postgres:5432/invoice_db
+      # --- PUBLIC BROWSER VARIABLES ---
+      - NEXT_PUBLIC_MINIO_URL=http://${HOST_IP}:9000
+      - NEXT_PUBLIC_URL=http://${HOST_IP}:3000
+      # --- DATABASE ---
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}      
     extra_hosts:
       - "localhost:host-gateway"
     volumes:
@@ -156,15 +328,14 @@ services:
     container_name: pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}       
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD} 
     ports:
-      - "5050:80"  # Access via http://localhost:5050
+      - "5050:80"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin  # Persist your server connections
+      - pgadmin_data:/var/lib/pgadmin
     networks:
       - invoice-app-network
-
 
 networks:
   invoice-app-network:
