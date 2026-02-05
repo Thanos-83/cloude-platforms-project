@@ -109,7 +109,23 @@ services:
         condition: service_healthy
     networks:
       - invoice-app-network
-
+  thingsboard:
+    image: thingsboard/tb-postgres
+    container_name: thingsboard
+    restart: always
+    environment:
+      - TB_QUEUE_TYPE=in-memory
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./data/thingsboard:/data
+      - ./logs/thingsboard:/var/log/thingsboard
+    networks:
+      - invoice-app-network
+    deploy:
+      resources:
+        limits:
+          memory: 768M
   # Next.js Frontend
   frontend:
     container_name: frontend
@@ -117,6 +133,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: dev
+    # image: heisenberg83/invoices-frontend:latest
     restart: always
     ports:
       - "3000:3000"
@@ -143,7 +160,25 @@ services:
       - keycloak
     networks:
       - invoice-app-network
-
+  # nginx-proxy-manager
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    container_name: nginx-proxy-manager
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data/npm:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - frontend
+      - thingsboard
+      - node-red
+      - minio
+    networks:
+      - invoice-app-network
   # pgAdmin
   pgadmin:
     image: dpage/pgadmin4:latest

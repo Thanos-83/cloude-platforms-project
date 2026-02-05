@@ -7,7 +7,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     clientSecret: process.env.KEYCLOAK_SECRET,
     issuer: process.env.KEYCLOAK_ISSUER,
     authorization: {
-      url: "http://localhost:8080/realms/invoice-realm/protocol/openid-connect/auth",
+      url: `${process.env.AUTH_KEYCLOAK_ISSUER}/protocol/openid-connect/auth`,
       params: { scope: 'openid profile email', prompt: 'login' },
     },    
   })],

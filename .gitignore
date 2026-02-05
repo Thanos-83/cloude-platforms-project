@@ -30,6 +30,14 @@ node-red/data/.npm/
 node-red/data/.cache/
 node-red/data/_cacache/
 
+# --- ThingsBoard ---
+data/thingsboard
+logs/thingsboard
+
+# --- Nginx Proxy Manager ---
+data/nginx
+letsencrypt
+
 # --- Environment Variables---
 .env
 .env*.local

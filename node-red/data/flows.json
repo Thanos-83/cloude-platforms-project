@@ -425,7 +425,9 @@
         "x": 1350,
         "y": 600,
         "wires": [
-            [],
+            [
+                "ad27032b9a7549ad"
+            ],
             [
                 "c592ba5989b60ed2"
             ]
@@ -620,6 +622,85 @@
         "statusType": "auto",
         "x": 1060,
         "y": 720,
+        "wires": []
+    },
+    {
+        "id": "ad27032b9a7549ad",
+        "type": "function",
+        "z": "def52207a6d61348",
+        "name": "ThingsBoard Data",
+        "func": "msg.payload = {\n    \"invoice_generated\": 1,\n    \"filename\": msg.filename || \"unknown.pdf\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1650,
+        "y": 560,
+        "wires": [
+            [
+                "f810760f488c0495",
+                "83b41662dac528f3"
+            ]
+        ]
+    },
+    {
+        "id": "f810760f488c0495",
+        "type": "debug",
+        "z": "def52207a6d61348",
+        "name": "ThingsBoard Data Overview",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1820,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "83b41662dac528f3",
+        "type": "http request",
+        "z": "def52207a6d61348",
+        "name": "Send Data to ThingsBoard",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://thingsboard:9090/api/v1/Rdgr0mhlF5kUA93aoBOG/telemetry",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2020,
+        "y": 560,
+        "wires": [
+            [
+                "6d06413ced01e05c"
+            ]
+        ]
+    },
+    {
+        "id": "6d06413ced01e05c",
+        "type": "debug",
+        "z": "def52207a6d61348",
+        "name": "Return JSON from ThingsBoard",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2390,
+        "y": 460,
         "wires": []
     }
 ]
