@@ -26,13 +26,13 @@ The application is currently deployed live and can be tested at the following UR
 
 | Service | URL | Username | Password |
 | :--- | :--- | :--- | :--- |
-| **Main App** | [https://cloudplatforms.space](https://cloudplatforms.space) | `user` | `password` |
-| **ThingsBoard** | [https://iot.cloudplatforms.space](https://iot.cloudplatforms.space) | `tenant@thingsboard.org` | `tenant` |
-| **Node-RED** | [https://nodered.cloudplatforms.space](https://nodered.cloudplatforms.space) | *(No Auth)* | - |
-| **MinIO Console** | [https://minio.cloudplatforms.space](https://minio.cloudplatforms.space) | `minioadmin` | `minioadmin` |
-| **RabbitMQ** | [https://rabbitmq.cloudplatforms.space](https://rabbitmq.cloudplatforms.space) | `user` | `password` |
-| **Keycloak** | [https://auth.cloudplatforms.space](https://auth.cloudplatforms.space) | `admin` | `admin` |
-| **pgAdmin** | [https://pgadmin.cloudplatforms.space](https://pgadmin.cloudplatforms.space) | `admin@admin.com` | `admin` |
+| **Main App** | [https://cloudplatforms.space](https://cloudplatforms.space) |  |  |
+| **ThingsBoard** | [https://iot.cloudplatforms.space](https://iot.cloudplatforms.space) |  |  |
+| **Node-RED** | [https://(...).cloudplatforms.space](https://nodered.cloudplatforms.space) | *(No Auth)* | - |
+| **MinIO Console** | [https://minio.cloudplatforms.space](https://minio.cloudplatforms.space) | | |
+| **RabbitMQ** | [https://rabbitmq.cloudplatforms.space](https://rabbitmq.cloudplatforms.space) | |  |
+| **Keycloak** | [https://auth.cloudplatforms.space](https://auth.cloudplatforms.space) |  |  |
+| **pgAdmin** | [https://pgadmin.cloudplatforms.space](https://pgadmin.cloudplatforms.space) |  |  |
 > **Note:** These credentials are for the live evaluation environment.
 
 ## 🚀 Deployment Instructions
